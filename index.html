@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Egret</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="full-screen" content="true"/>
+    <meta name="screen-orientation" content="portrait"/>
+    <meta name="x5-fullscreen" content="true"/>
+    <meta name="360-fullscreen" content="true"/>
+    <style>
+        html, body {
+            -ms-touch-action: none;
+            background: #888888;
+            padding: 0;
+            border: 0;
+            margin: 0;
+            height: 100%;
+        }
+    </style>
+
+    <script type="text/javascript">
+        var def = {
+            uid: "junyou",
+            ip: "127.0.0.1",
+            sid: 1,
+            port: 1234,
+            pid: "weixin"
+        };
+
+        function setCookie(name, value) {
+            var Days = 30;
+            var exp = new Date();
+            exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+            document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString();
+        }
+
+        //读取cookies 
+        function getCookie(name) {
+            var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+            if (arr = document.cookie.match(reg))
+                return unescape(arr[2]);
+            else
+                return null;
+        }
+        window.onload = function() {
+            var $g = function(id) {
+                return document.getElementById(id);
+            }
+            var $k = function(id) {
+                return getCookie(id) || def[id];
+            }
+
+            var uid = $g("uid");
+            var ip = $g("ip");
+            var sid = $g("sid");
+            var port = $g("port");
+            var pid = $g("pid");
+            uid.value = $k("uid");
+            ip.value = $k("ip");
+            sid.value = $k("sid");
+            port.value = $k("port");
+            pid.value = $k("pid");
+            var loader;
+            if (window["XMLHttpRequest"]) {
+                loader = new window["XMLHttpRequest"]();
+            } else {
+                loader = new ActiveXObject("MSXML2.XMLHTTP");
+            }
+            loader.onreadystatechange = function() {
+                if (loader.readyState == 4) { // 4 = "loaded"
+                    var ioError = (loader.status >= 400 || loader.status == 0);
+                    if (ioError) { //请求错误
+                        alert("账号验证错误");
+                    } else {
+                        var result = loader.responseText;
+                        egret["baseParams"] = {
+                            uid: uid.value,
+                            ip: ip.value,
+                            sid: sid.value,
+                            port: port.value,
+                            pid: pid.value,
+                            sign: result
+                        };
+                        egret.runEgret({
+                            renderMode: "canvas"
+                        });
+                        var tab = document.getElementById("tab");
+                        tab.parentNode.removeChild(tab);
+                    }
+                }
+            }
+            document.getElementById("btnLogin").onclick = function() {
+                var $s = function(id) {
+                    setCookie(id, $g(id).value);
+                }
+                $s("uid");
+                $s("ip");
+                $s("sid");
+                $s("port");
+                $s("pid");
+                _loginUrl = "http://" + ip.value + ":" + port.value + "/p?puid=" + uid.value + "&pid=" + pid.value + "&sid=" + sid.value;
+                loader.open("GET", _loginUrl, true);
+                loader.responseType = "";
+                loader.send();
+            }
+        }
+    </script>
+    <table id="tab">
+        <tr>
+            <td>用户名：</td>
+            <td><input id="uid" type="text" size="20" /></td>
+        </tr>
+        <tr>
+            <td>服务端ip：</td>
+            <td><input id="ip" type="text" size="20" /></td>
+        </tr>
+        <tr>
+            <td>服务器标识：</td>
+            <td><input id="sid" type="text" size="20" /></td>
+        </tr>
+        <tr>
+            <td>连接端口：</td>
+            <td><input id="port" type="text" size="20" /></td>
+        </tr>
+        <tr>
+            <td>平台id：</td>
+            <td><input id="pid" type="text" size="20" /></td>
+        </tr>
+        <tr>
+            <td>其他参数：</td>
+            <td><textarea id="other" cols="40" rows="5"></textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2"><input id="btnLogin" type="button" value="登录" /></td>
+        </tr>
+    </table>
+
+    <!--这个标签为通过egret提供的第三方库的方式生成的 javascript 文件。删除 modules_files 标签后，库文件加载列表将不会变化，请谨慎操作！-->
+    <!--modules_files_start-->
+	<script egret="lib" src="libs/modules/egret/egret.js" src-release="libs/modules/egret/egret.min.js"></script>
+	<script egret="lib" src="libs/modules/egret/egret.web.js" src-release="libs/modules/egret/egret.web.min.js"></script>
+	<script egret="lib" src="libs/modules/game/game.js" src-release="libs/modules/game/game.min.js"></script>
+	<script egret="lib" src="libs/modules/res/res.js" src-release="libs/modules/res/res.min.js"></script>
+	<script egret="lib" src="libs/modules/eui/eui.js" src-release="libs/modules/eui/eui.min.js"></script>
+	<script egret="lib" src="libs/modules/tween/tween.js" src-release="libs/modules/tween/tween.min.js"></script>
+	<script egret="lib" src="libs/modules/socket/socket.js" src-release="libs/modules/socket/socket.min.js"></script>
+	<script egret="lib" src="libs/modules/dragonBones/dragonBones.js" src-release="libs/modules/dragonBones/dragonBones.min.js"></script>
+	<!--modules_files_end-->
+
+    <!--这个标签为不通过egret提供的第三方库的方式使用的 javascript 文件，请将这些文件放在libs下，但不要放在modules下面。-->
+    <!--other_libs_files_start-->
+    <script egret="lib" src="polyfill/promise.js" src-release="polyfill/promise.min.js"></script>
+    <!--other_libs_files_end-->
+
+    <!--这个标签会被替换为项目中所有的 javascript 文件。删除 game_files 标签后，项目文件加载列表将不会变化，请谨慎操作！-->
+    <!--game_files_start-->
+	<script egret="game" src="bin-debug/AssetAdapter.js"></script>
+	<script egret="game" src="bin-debug/Main.js"></script>
+	<script egret="game" src="bin-debug/ThemeAdapter.js"></script>
+	<!--game_files_end-->
+</head>
+<body>
+
+    <div style="margin: auto;width: 100%;height: 100%;" class="egret-player"
+         data-entry-class="Main"
+         data-orientation="auto"
+         data-scale-mode="showAll"
+         data-frame-rate="30"
+         data-content-width="640"
+         data-content-height="1136"
+         data-show-paint-rect="false"
+         data-multi-fingered="2"
+         data-show-fps="false" data-show-log="false"
+         data-show-fps-style="x:0,y:0,size:12,textColor:0xffffff,bgAlpha:0.9">
+    </div>
+    <script>
+        /**
+         * {
+         * "renderMode":, //引擎渲染模式，"canvas" 或者 "webgl"
+         * "audioType": "" //使用的音频类型，0:默认，1:qq audio，2:web audio，3:audio
+         * "antialias": //WebGL模式下是否开启抗锯齿，true:开启，false:关闭，默认为false
+         * }
+         **/
+        egret.runEgret({renderMode:"webgl", audioType:0});
+    </script>
+</body>
+</html>
